@@ -1,6 +1,13 @@
 # freyja
 Coletamos as almas dos repositórios (e dos alunos)
 
+## Req.
+
+Para usar os scripts você deve:
+
+1. Instalar o GitHub CLI (gh) seguindo os passos em: https://github.com/cli/cli
+2. Autenticar com o gh: `gh auth login` 
+
 #### Create repo list
 
 ```  
