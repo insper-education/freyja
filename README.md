@@ -1,7 +1,7 @@
 # freyja
 Coletamos as almas dos repositórios (e dos alunos)
 
-## Create repo list
+#### Create repo list
 
 ```  
     nome base do repositorio |                      | salva lista em
@@ -9,7 +9,7 @@ Coletamos as almas dos repositórios (e dos alunos)
 ./getReposList.py --filter 21a-emb-aps2 --save repos-emb-aps2.yml
 ```
 
-## Download repos
+#### Download repos
 
 ```
      arquivo com lista dos repos |                         | salva na pasta
@@ -17,7 +17,7 @@ Coletamos as almas dos repositórios (e dos alunos)
 ./downloadRepos.py --config repos-emb-aps2.yml --save emb-aps2
 ```
 
-## Create issues 
+#### Create issues 
 
 Cria issues em uma lista de repositórios.
 
