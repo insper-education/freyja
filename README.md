@@ -7,7 +7,7 @@ Coletamos as almas dos repositórios (e dos alunos)
     nome base do repositorio |                      | salva lista em
                              v                      v
 ./getReposList.py --filter 21a-emb-aps2 --save repos-emb-aps2.yml
-`` 
+```
 
 ## Download repos
 
