@@ -21,7 +21,7 @@ Para usar os scripts você deve:
 ```
      arquivo com lista dos repos |                         | salva na pasta
                                  v                         v
-./downloadRepos.py --config repos-emb-aps2.yml --save emb-aps2
+./downloadRepos.py --repos repos-emb-aps2.yml --save emb-aps2
 ```
 
 #### Create issues 
@@ -29,7 +29,7 @@ Para usar os scripts você deve:
 Cria issues em uma lista de repositórios.
 
 ```
-./issuesCreate.py --config issues.yml --repos repos-emb-aps2.yml --issues
+./createIssues.py --repos repos-emb-aps2.yml --issues issues.yml
 ```
 
 issues.yml
@@ -49,5 +49,13 @@ issues:
       - [ ] Ler o readme
       - [ ] Ler a rubrica
 ``` 
+#### pull local reps
 
+Pull new changes from local repositories with upstream 
+
+```
+		            | folder with repositories		
+                            v
+./pullLocalReps.py --path emb-aps
+```
 
