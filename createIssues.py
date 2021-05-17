@@ -13,86 +13,80 @@ import tempfile
 import subprocess
 import time
 
-# TODO: precisa criar o alias antes, tirar isso
-# gh alias set createMilestone 'api --method POST repos/:owner/:repo/milestones --input'
-def ghMilestoneCreate(milestone):
-    body = {'title':milestone, 'state':'open', 'due_on': '2021-06-16T23:00:01Z'}
-    with tempfile.NamedTemporaryFile() as tf:
-        j = json.dumps(body)
-        tf.write(bytes(j, encoding = 'utf-8'))
-        tf.flush()
-        command = 'gh api --method POST repos/rafaelcorsi/test/milestones --input {}'.format(tf.name)
-    #out = subprocess.check_output(command, shell=True).decode('utf-8')
-        print(command)
-        import pdb; pdb.set_trace()
-    #print(out)
+class createIssues():
+    def __init__(self, reposYml, issuesYml):
+        with open(issuesYml, 'r') as file:
+            self.issues = yaml.load(file, Loader=yaml.FullLoader)['issues']
+
+        with open(reposYml, 'r') as file:
+            self.repos = yaml.load(file, Loader=yaml.FullLoader)
+
+        self.log = {}
 
 
-def ghMilestoneCreateBulk(milestone, repos):
-    for repo in repos:
-        print('repo: {}'.format(repo))
-        for m in milestone:
-            ghMilestoneCreate(milestone[m])
+    def run(self):
+        self.ghIssueCreateBulk()
 
 
-def ghIssueList(repo):
-    command = 'issue list -s all -R {}'.format(repo)
-    out = subprocess.check_output('gh {}'.format(command), shell=True).decode('utf-8')
-    return(out)
+    def report(self):
+        for r, s in self.log.items():
+            print(r)
+            for n in s:
+                print("{}: {}".format(n[0], n[1]))
+        pass
 
 
-def ghIssueExist(issueList, issue):
-    if issueList.find(issue['Title']) > 0:
-        return True
-    return False
+    def ghIssueList(self, repo):
+        command = 'issue list -s all -R {}'.format(repo)
+        out = subprocess.check_output('gh {}'.format(command), shell=True).decode('utf-8')
+        return(out)
 
 
-def ghIssueCreeate(issue, repo):
-    title = '\'{}\''.format(issue['Title'])
-    body = '\'{}\''.format(issue['Body'])
-    command = 'gh issue create -t {} -b {} -R {}'.format(title, body, repo)
-    #if :
-    #    command = command + " -m {}".format(milestone)
-    os.system(command)
+    def ghIssueExist(self, issueList, issue):
+        if issueList.find(issue['Title']) > 0:
+            return True
+        return False
 
 
-def ghIssueCreateBulk(issues, repos):
-    for repo in repos:
-        print(repo)
-        issueList = ghIssueList(repo)
-        for k, v in issues.items():
-            if ghIssueExist(issueList, v) is False:
-                print('criando issue: {}'.format(v['Title']))
-                ghIssueCreeate(v, repo)
-                time.sleep(10)
-            else:
-                print('issue já existia: {}'.format(v['Title']))
+    def ghIssueCreeate(self, issue, repo):
+        title = '\'{}\''.format(issue['Title'])
+        body = '\'{}\''.format(issue['Body'])
+        command = 'issue create -t {} -b {} -R {}'.format(title, body, repo)
+        process = subprocess.Popen(['gh', command],
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        return stderr
+
+
+    def ghIssueCreateBulk(self):
+        for repo in self.repos:
+            log = []
+            status = None
+            issueList = self.ghIssueList(repo)
+            for k, v in self.issues.items():
+                if self.ghIssueExist(issueList, v) is False:
+ #                   print('criando issue: {}'.format(v['Title']))
+                    r = self.ghIssueCreeate(v, repo)
+                    if r:
+                        status = 'Erro'
+                    else:
+                        status = 'Created'
+                    time.sleep(0)
+                else:
+                    status = 'Existed'
+  #                  print('issue já existia: {}'.format(v['Title']))
+                log.append([v['Title'], status])
+            self.log[repo] = log
 
 
 if __name__ == '__main__':
     argparse.ArgumentParser()
     parser = argparse.ArgumentParser(prog='Automatic issue create on github - CLI')
-    parser.add_argument('--config', default=None,  type=str, help='Issues (yml)')
     parser.add_argument('--repos', default=None,  type=str, help='Repositorios (yml)')
-    parser.add_argument('--issues', default=False, action='store_true', help='Cria os issues')
-    parser.add_argument('--milestone', default=False, action='store_true', help='Cria os milestones')
-
+    parser.add_argument('--issues', default=None,  type=str, help='Issues (yml)')
     args = parser.parse_args()
 
-    #ghMilestoneCreate('aaaaa')
-
-    if(args.config is not None):
-        with open(args.config, 'r') as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)
-
-    if(args.repos is not None):
-        with open(args.repos, 'r') as file:
-            repos = yaml.load(file, Loader=yaml.FullLoader)
-
-    if args.milestone:
-        print('Criando milestones')
-        ghMilestoneCreateBulk(config['milestone'], repos)
-
-    if args.issues:
-        print('Criando issues')
-        ghIssueCreateBulk(config['issues'], repos)
+    ci = createIssues(args.repos, args.issues)
+    ci.run()
+    ci.report()
